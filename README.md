@@ -30,9 +30,18 @@ TypeScript, JavaScript, Python, Java, Go, Rust
 
 ## 설치
 
+프로젝트의 `.claude/plugins/` 디렉토리에 clone합니다:
+
 ```bash
-cp -r architecture-enforcer .claude/plugins/architecture-enforcer
+git clone https://github.com/wowoyong/claude-plugin-architecture-enforcer.git .claude/plugins/architecture-enforcer
 ```
+
+### 업데이트
+
+```bash
+cd .claude/plugins/architecture-enforcer && git pull
+```
+
 
 ## 사용법
 
