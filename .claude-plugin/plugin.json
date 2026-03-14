@@ -49,6 +49,9 @@
   "mcp": {
     "server": "architecture-enforcer-mcp",
     "specPath": "mcp/server-spec.md",
+    "transport": "stdio",
+    "entrypoint": "npx architecture-enforcer-mcp",
+    "status": "planned",
     "tools": [
       {
         "name": "check_layer_violation",

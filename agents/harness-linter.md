@@ -94,7 +94,7 @@ When a file imports from a layer it should not depend on.
       "4. Ensure OrderForm component in UI layer imports OrderFormData from src/types/order.ts"
     ]
   },
-  "docs": "docs/layers.md#service-layer",
+  "docs": "docs/layers.md#layer-4-service",
   "context": {
     "fromLayer": "service",
     "toLayer": "ui",
@@ -171,6 +171,8 @@ When two or more files form a dependency cycle.
   "why": "Circular dependencies prevent tree-shaking, cause unpredictable initialization order, and make modules impossible to test in isolation.",
   "fix": {
     "action": "break_cycle",
+    "current": "A imports B, B imports A",
+    "replacement": "Extract shared interface to src/contracts/",
     "weakest_link": {
       "from": "src/services/userService.ts",
       "to": "src/services/authService.ts",
@@ -231,7 +233,7 @@ When a file name does not match the required convention.
       { "file": "src/components/index.ts", "line": 12 }
     ]
   },
-  "docs": "docs/layers.md#naming-conventions",
+  "docs": "docs/layers.md#naming-conventions-by-layer",
   "context": {
     "expectedConvention": "PascalCase",
     "ruleId": "component-naming"

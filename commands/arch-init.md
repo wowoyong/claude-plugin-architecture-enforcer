@@ -254,6 +254,13 @@ Feature-based modular architecture:
 - Shared module for cross-cutting concerns
 - No direct cross-module imports (must go through public API)
 
+### `--preset harness`
+Harness Engineering 6계층 아키텍처:
+- 레이어: Types(L1) → Config(L2) → Repo(L3) → Service(L4) → Runtime(L5) → UI(L6)
+- Providers: 교차 관심사를 단일 인터페이스로 주입
+- 에이전트 친화적 린트 메시지 활성화
+- 엄격한 단방향 의존성 (하위 레이어만 참조 가능)
+
 ## Important Notes
 
 - If `.arch-rules.json` already exists, ask the user before overwriting

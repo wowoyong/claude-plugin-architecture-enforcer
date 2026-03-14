@@ -225,6 +225,8 @@ When the user invokes `/arch` or `/architecture`, determine the intent and follo
 /arch boundaries           → Show module boundary map
 /arch violations           → Show only violations from last check
 /arch hook                 → Set up pre-commit hook
+/arch lint                 → Harness 린팅 실행 (에이전트 친화적 출력)
+/arch providers            → Providers 패턴 설정
 ```
 
 ---
@@ -447,23 +449,6 @@ Use the **architecture-auditor** agent for this workflow.
 
 ---
 
-## Important Rules
-
-- **NEVER modify source code without explicit user approval.** This tool reports and suggests — it does not auto-refactor.
-- **ALWAYS read `.arch-rules.json` before running any check.** Never assume rules.
-- **If `.arch-rules.json` does not exist**, guide the user to create one via `/arch init`. Do not proceed with checks.
-- **Respect the `ignore` patterns.** Never report violations in ignored paths.
-- **Test files are exempt from most rules** unless explicitly configured otherwise.
-- **Shared modules** (types, utils, constants, config) are exempt from module boundary restrictions by default.
-- **When suggesting fixes, consider the full dependency chain.** Moving an import may cascade.
-- **Performance**: For large codebases, process files in batches. Report progress periodically.
-- **Language-specific import resolution**:
-  - TypeScript/JavaScript: handle `@/` aliases, `tsconfig.json` paths, barrel exports (`index.ts`)
-  - Python: handle relative imports, `__init__.py`, `sys.path` modifications
-  - Java: handle package declarations, Maven/Gradle module boundaries
-  - Go: handle package paths, internal packages
-- **Monorepo awareness**: In monorepos, treat each package as a separate boundary. Cross-package imports should go through defined public APIs only.
-
 ### Workflow 5: Harness Linting (`/arch lint --harness` or `/arch lint`)
 
 Use the **harness-linter** agent for this workflow.
@@ -570,6 +555,25 @@ Configure cross-cutting concern providers for the project.
 6. **Offer auto-migration**
    - If the user approves, replace direct imports with Providers imports across the codebase
    - Re-run `/arch lint` to verify no violations remain
+
+---
+
+## Important Rules
+
+- **NEVER modify source code without explicit user approval.** This tool reports and suggests — it does not auto-refactor.
+- **ALWAYS read `.arch-rules.json` before running any check.** Never assume rules.
+- **If `.arch-rules.json` does not exist**, guide the user to create one via `/arch init`. Do not proceed with checks.
+- **Respect the `ignore` patterns.** Never report violations in ignored paths.
+- **Test files are exempt from most rules** unless explicitly configured otherwise.
+- **Shared modules** (types, utils, constants, config) are exempt from module boundary restrictions by default.
+- **When suggesting fixes, consider the full dependency chain.** Moving an import may cascade.
+- **Performance**: For large codebases, process files in batches. Report progress periodically.
+- **Language-specific import resolution**:
+  - TypeScript/JavaScript: handle `@/` aliases, `tsconfig.json` paths, barrel exports (`index.ts`)
+  - Python: handle relative imports, `__init__.py`, `sys.path` modifications
+  - Java: handle package declarations, Maven/Gradle module boundaries
+  - Go: handle package paths, internal packages
+- **Monorepo awareness**: In monorepos, treat each package as a separate boundary. Cross-package imports should go through defined public APIs only.
 
 ---
 

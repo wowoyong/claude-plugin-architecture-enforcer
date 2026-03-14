@@ -88,6 +88,7 @@ For each import relationship (fileA imports fileB):
 
 1. Determine layerA (layer of fileA) and layerB (layer of fileB)
 2. Get the layer order from `layers.order` — index 0 is the topmost layer
+   > **Note**: harness 프리셋의 경우, index 0이 기반 레이어(Types)이므로 의존성 방향은 index가 작은 쪽(하위 레이어)으로만 허용된다.
 3. If `layers.strict` is true:
    - layerA can only import from layerA (same layer) or layer at index+1 (one level down)
    - Any other direction is a violation

@@ -24,8 +24,7 @@ graph TD
     Config["Layer 2: Config"]
     Types["Layer 1: Types"]
 
-    UI --> Runtime
-    UI --> Service
+    UI -.->|"via DI/Providers"| Service
     UI --> Types
     Runtime --> Service
     Runtime --> Repo
@@ -395,6 +394,21 @@ Within each layer, modules may have additional boundary rules defined in `.arch-
 
 ---
 
+## File Placement
+
+Files must be placed in directories corresponding to their layer. The architecture-enforcer checks file suffixes and naming patterns against configured placement rules. See the `file-placement` rule type in `.arch-rules.json` for the full mapping. Each layer has designated directories:
+
+| Layer | Default Directories |
+|-------|-------------------|
+| Types | `src/types/`, `src/interfaces/` |
+| Config | `src/config/`, `src/env/` |
+| Repo | `src/repositories/`, `src/data/`, `src/clients/` |
+| Service | `src/services/`, `src/usecases/` |
+| Runtime | `src/runtime/`, `src/bootstrap/`, `src/server/` |
+| UI | `src/components/`, `src/pages/`, `src/views/`, `src/routes/` |
+
+---
+
 ## Anti-Patterns
 
 ### 1. Upward dependency
@@ -485,6 +499,27 @@ Circular dependencies are prohibited at all levels. When detected:
 | Service | `lib/actions/` | `*.service.ts` | `services/` | `services/` |
 | Runtime | `instrumentation.ts` | `main.ts`, `app.module.ts` | `app.ts` | `main.py` |
 | UI | `app/`, `components/` | `*.controller.ts` | `routes/` | `routers/` |
+
+---
+
+## `--preset harness` Example Config
+
+When using `/arch init --preset harness`, the following `.arch-rules.json` is generated:
+
+```json
+{
+  "version": "1.0",
+  "projectType": "harness",
+  "layers": {
+    "order": ["types", "config", "repo", "service", "runtime", "ui"],
+    "strict": true
+  },
+  "providers": {
+    "interface": "src/providers/index.ts",
+    "concerns": ["auth", "logging", "telemetry", "featureFlags"]
+  }
+}
+```
 
 ---
 

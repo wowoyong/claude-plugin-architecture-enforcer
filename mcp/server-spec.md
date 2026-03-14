@@ -558,7 +558,23 @@ Run harness linting on a single file and return agent-friendly violations with f
       "type": "array",
       "items": {
         "type": "object",
-        "description": "Harness-lint violation object (see harness-linter agent spec)"
+        "description": "Harness-lint violation object",
+        "properties": {
+          "violation": { "type": "string" },
+          "severity": { "type": "string" },
+          "file": { "type": "string" },
+          "line": { "type": "number" },
+          "what": { "type": "string" },
+          "why": { "type": "string" },
+          "fix": {
+            "type": "object",
+            "properties": {
+              "action": { "type": "string" },
+              "steps": { "type": "array", "items": { "type": "string" } }
+            }
+          },
+          "docs": { "type": "string" }
+        }
       }
     },
     "clean": {
