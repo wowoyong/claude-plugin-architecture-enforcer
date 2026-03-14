@@ -1,0 +1,52 @@
+{
+  "name": "architecture-enforcer",
+  "version": "1.0.0",
+  "description": "Architecture rule enforcement tool - validates module boundaries, layer dependencies, naming conventions, and structural integrity",
+  "author": "jojaeyong",
+  "skills": [
+    {
+      "name": "architecture",
+      "path": "skills/architecture/SKILL.md",
+      "triggers": [
+        "/arch",
+        "/architecture",
+        "/arch-check",
+        "/arch-init"
+      ]
+    }
+  ],
+  "commands": [
+    {
+      "name": "arch-check",
+      "path": "commands/arch-check.md",
+      "description": "Check codebase against architecture rules and report violations"
+    },
+    {
+      "name": "arch-init",
+      "path": "commands/arch-init.md",
+      "description": "Initialize architecture rules interactively for a project"
+    }
+  ],
+  "agents": [
+    {
+      "name": "boundary-checker",
+      "path": "agents/boundary-checker.md",
+      "description": "Analyze imports and dependencies against defined module boundary rules"
+    },
+    {
+      "name": "architecture-auditor",
+      "path": "agents/architecture-auditor.md",
+      "description": "Deep audit of architecture health, coupling metrics, and improvement suggestions"
+    }
+  ],
+  "configFile": ".arch-rules.json",
+  "supportedLanguages": [
+    "typescript",
+    "javascript",
+    "python",
+    "java",
+    "go",
+    "rust"
+  ],
+  "license": "MIT"
+}
