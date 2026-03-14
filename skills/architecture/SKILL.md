@@ -464,6 +464,164 @@ Use the **architecture-auditor** agent for this workflow.
   - Go: handle package paths, internal packages
 - **Monorepo awareness**: In monorepos, treat each package as a separate boundary. Cross-package imports should go through defined public APIs only.
 
+### Workflow 5: Harness Linting (`/arch lint --harness` or `/arch lint`)
+
+Use the **harness-linter** agent for this workflow.
+
+This workflow produces agent-friendly lint output where every violation includes machine-executable fix instructions. It is designed for LLMs and automated coding agents that need to resolve architecture violations autonomously.
+
+1. **Load configuration**
+   - Read `.arch-rules.json` from the project root
+   - If not found, suggest running `/arch init` first
+   - Detect if the 6-layer model is configured; if not, suggest running `/arch init --preset harness`
+
+2. **Run boundary-checker analysis**
+   - Delegate to the boundary-checker agent to produce a standard violation report
+   - Pass all source files (respecting the `ignore` list)
+   - If `--diff` flag is provided, only check files changed since last commit
+
+3. **Enrich violations with fix instructions**
+   - For each violation from the boundary-checker:
+     a. Determine the violation handler type (layer-dependency, module-boundary, circular-dependency, naming-convention, file-placement, providers-violation)
+     b. Generate the structured fix object with `action`, `current`, `replacement`, and `steps`
+     c. Resolve the `docs` reference to the correct section in `docs/layers.md`
+     d. Add `context` metadata (layers, modules, rule IDs)
+
+4. **Generate fix plan**
+   - Analyze dependencies between fixes (e.g., a type must be created before imports can reference it)
+   - Order fixes into phases
+   - Estimate the number of files to create, modify, move, and rename
+
+5. **Output harness-lint report**
+   - Format based on `--format` flag:
+     - `full` (default): Complete violation objects with all fields
+     - `compact`: Abbreviated one-line violations for CI/CD
+     - `agent-only`: Only fix instructions, no explanations
+   - Include the aggregate summary envelope with `fix_plan`
+
+6. **MCP integration**
+   - If the MCP server is active, violations are also available via the `lint_file` tool
+   - Agents can query individual files in real-time during coding
+
+**Invocation examples**:
+```
+/arch lint                          Run harness linting with full output
+/arch lint --harness                Same as above (explicit)
+/arch lint --format compact         Compact output for CI/CD
+/arch lint --format agent-only      Fix instructions only
+/arch lint --diff                   Check only changed files
+/arch lint --module src/services    Check a specific module only
+```
+
+---
+
+### Workflow 6: Providers Pattern Setup (`/arch providers`)
+
+Configure cross-cutting concern providers for the project.
+
+1. **Detect cross-cutting concerns**
+   - Scan the codebase for common patterns:
+     - Logging: `console.log`, `winston`, `pino`, `bunyan` imports
+     - Telemetry: `segment`, `amplitude`, `posthog`, `mixpanel` imports
+     - Auth: `auth0`, `clerk`, `jsonwebtoken`, `passport` imports
+     - Feature flags: `launchdarkly`, `unleash`, `flagsmith` imports
+     - Error tracking: `sentry`, `bugsnag`, `datadog` imports
+   - Report findings:
+     ```
+     Cross-cutting concern scan:
+       Logging:        winston (found in 12 files)
+       Telemetry:      segment (found in 8 files)
+       Auth:           auth0 (found in 15 files)
+       Feature Flags:  (none detected)
+       Error Tracking: sentry (found in 6 files)
+     ```
+
+2. **Generate Providers interface**
+   - Create the `Providers` type in `src/types/providers.ts` (Layer 1)
+   - Define typed interfaces for each detected concern
+   - Ask the user to confirm which concerns to include
+
+3. **Generate Providers implementation**
+   - Create `src/providers/index.ts` with concrete implementations
+   - Wire each concern to the detected library
+   - Create factory functions for each provider
+
+4. **Generate migration plan**
+   - For each file that directly imports a cross-cutting library:
+     - Show the current import
+     - Show the replacement import using Providers
+     - Estimate the change scope
+   - Ask the user to confirm the migration
+
+5. **Update `.arch-rules.json`**
+   - Add `providers` section to the config:
+     ```json
+     {
+       "providers": {
+         "enabled": true,
+         "interfacePath": "src/types/providers.ts",
+         "implementationPath": "src/providers/index.ts",
+         "concerns": ["logging", "telemetry", "auth", "errorTracking"]
+       }
+     }
+     ```
+   - Add `providers-pattern` rule to enforce the pattern
+
+6. **Offer auto-migration**
+   - If the user approves, replace direct imports with Providers imports across the codebase
+   - Re-run `/arch lint` to verify no violations remain
+
+---
+
+## 6-Layer Architecture Model
+
+The plugin supports a fixed 6-layer architecture model optimized for agent-friendly enforcement:
+
+```
+Layer 1: Types    — Pure type definitions, interfaces, enums (no runtime code)
+Layer 2: Config   — Configuration loading, env vars, feature flags
+Layer 3: Repo     — Data access, external API clients, database queries
+Layer 4: Service  — Business logic, use cases, orchestration
+Layer 5: Runtime  — App bootstrap, middleware, DI container
+Layer 6: UI       — Components, pages, CLI handlers
+```
+
+Dependencies flow **downward only**: a layer may import from any layer with a lower number. See `docs/layers.md` for the complete reference.
+
+### When to use the 6-layer model
+
+- **New projects**: Use `/arch init --preset harness` to scaffold the 6-layer model
+- **Existing layered projects**: The 6-layer model is a superset of traditional 3-layer and 4-layer architectures. Map existing layers to the closest 6-layer equivalent.
+- **Agent-driven development**: The fixed layer numbers make it trivial for agents to validate imports — no ambiguity about layer ordering.
+
+### Preset: `--preset harness`
+
+Configures the 6-layer model with:
+- Fixed layer order: Types, Config, Repo, Service, Runtime, UI
+- Strict downward-only dependencies
+- Providers pattern for cross-cutting concerns
+- Agent-friendly lint output enabled by default
+- Standard naming conventions per layer
+
+---
+
+## MCP Server Tools
+
+When the MCP server is active (see `mcp/server-spec.md`), agents can use the following tools during coding sessions:
+
+| Tool | When to Use | Performance |
+|------|-------------|-------------|
+| `get_architecture_map` | Start of session — understand the full architecture | Cache result |
+| `check_layer_violation` | Before adding a new import | Lightweight |
+| `check_module_boundary` | When crossing module boundaries | Lightweight |
+| `suggest_correct_layer` | When creating a new file | Fast heuristic |
+| `get_layer_rules` | When editing a file — know what is allowed | Lightweight |
+| `lint_file` | After modifying a file — catch violations | Full analysis |
+
+Agents should call `get_architecture_map` once at session start and cache it, then use `check_layer_violation` and `check_module_boundary` inline during coding for real-time feedback.
+
+---
+
 ## Error Handling
 
 - If `.arch-rules.json` has syntax errors, report the exact error with line number and do not proceed.

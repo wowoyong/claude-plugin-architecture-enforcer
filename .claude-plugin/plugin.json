@@ -1,7 +1,7 @@
 {
   "name": "architecture-enforcer",
-  "version": "1.0.0",
-  "description": "Architecture rule enforcement tool - validates module boundaries, layer dependencies, naming conventions, and structural integrity",
+  "version": "2.0.0",
+  "description": "Architecture rule enforcement tool - validates module boundaries, layer dependencies, naming conventions, and structural integrity. Supports Harness Engineering with agent-friendly linting and 6-layer architecture model.",
   "author": "jojaeyong",
   "skills": [
     {
@@ -11,7 +11,9 @@
         "/arch",
         "/architecture",
         "/arch-check",
-        "/arch-init"
+        "/arch-init",
+        "/arch-lint",
+        "/arch-providers"
       ]
     }
   ],
@@ -37,6 +39,48 @@
       "name": "architecture-auditor",
       "path": "agents/architecture-auditor.md",
       "description": "Deep audit of architecture health, coupling metrics, and improvement suggestions"
+    },
+    {
+      "name": "harness-linter",
+      "path": "agents/harness-linter.md",
+      "description": "Agent-friendly architecture linter with actionable fix instructions for LLMs and automated systems"
+    }
+  ],
+  "mcp": {
+    "server": "architecture-enforcer-mcp",
+    "specPath": "mcp/server-spec.md",
+    "tools": [
+      {
+        "name": "check_layer_violation",
+        "description": "Check if an import violates layer dependency rules"
+      },
+      {
+        "name": "get_layer_rules",
+        "description": "Get the layer configuration and allowed imports for a file or module"
+      },
+      {
+        "name": "check_module_boundary",
+        "description": "Verify a cross-module dependency is allowed by boundary rules"
+      },
+      {
+        "name": "suggest_correct_layer",
+        "description": "Suggest which layer a type, function, or file belongs to"
+      },
+      {
+        "name": "get_architecture_map",
+        "description": "Return the full architecture map for the current project"
+      },
+      {
+        "name": "lint_file",
+        "description": "Run harness linting on a single file with agent-friendly output"
+      }
+    ]
+  },
+  "docs": [
+    {
+      "name": "layers",
+      "path": "docs/layers.md",
+      "description": "6-layer architecture model reference (Types, Config, Repo, Service, Runtime, UI)"
     }
   ],
   "configFile": ".arch-rules.json",
